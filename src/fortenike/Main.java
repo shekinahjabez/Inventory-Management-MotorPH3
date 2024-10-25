@@ -1,8 +1,10 @@
-package org.fortenike;
-
 import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 
-public class Main {
+public class InventoryManagementSystem {
+
     // Create a hash map for quick access
     private static Map<Integer, InventoryItem> inventoryMap = new HashMap<>();
     // Create the root of the BST
@@ -39,10 +41,29 @@ public class Main {
         return root;
     }
 
-    private static void viewInventory() {
-        System.out.println("\nInventory List (Sorted):");
-        inOrderTraversal(bstRoot);
+   private static void viewInventory() {
+    System.out.println("\nInventory List:");
+    System.out.println("1. Sort by Brand (Ascending)");
+    System.out.println("2. Display All Items");
+    System.out.print("Enter your choice (1 or 2): ");
+
+    Scanner scanner = new Scanner(System.in);
+    int choice = scanner.nextInt();
+    scanner.nextLine();
+
+    List<InventoryItem> items = new ArrayList<>(inventoryMap.values());
+
+    if (choice == 1) {
+        // Sort by brand using a custom comparator
+        items.sort(Comparator.comparing(InventoryItem::getBrand));
+        System.out.println("\nInventory List (Sorted by Brand):");
     }
+
+    // Print the list (sorted or unsorted)
+    for (InventoryItem item : items) {
+        System.out.println(item);
+    }
+}
 
     private static void inOrderTraversal(TreeNode node) {
         if (node != null) {
@@ -52,28 +73,73 @@ public class Main {
         }
     }
 
-    private static InventoryItem findItem(int id) {
+    private static InventoryItem searchItem(int id) {
         return inventoryMap.get(id); // O(1) lookup
     }
 
-    private static void searchItem(Scanner scanner) {
-        System.out.print("Enter ID of item to search: ");
-        int id = scanner.nextInt();
-        InventoryItem item = findItem(id);
+    private static InventoryItem searchItem(Scanner scanner) {
+    System.out.println("Enter search criteria [ Y / N ]:");
+    String choice = scanner.nextLine().toLowerCase();
 
-        if (item != null) {
-            System.out.println("Item found: " + item);
-        } else {
-            System.out.println("Item with ID " + id + " not found.");
+        switch (choice) {
+            case "y":
+                System.out.print("Stock Label (leave blank to ignore): ");
+                String stockLabel = scanner.nextLine();
+                if (stockLabel.isEmpty());
+                
+                System.out.print("Brand (leave blank to ignore): ");
+                String brand = scanner.nextLine();
+                if (brand.isEmpty());
+                
+                System.out.print("Engine Number (leave blank to ignore): ");
+                String engineNumber = scanner.nextLine();
+                if (engineNumber.isEmpty());
+                
+                System.out.print("Status (leave blank to ignore): ");
+                String status = scanner.nextLine();
+                
+                // Find the item using multiple criteria
+                List<InventoryItem> foundItems = inventoryMap.values().stream()
+                    .filter(item -> (stockLabel.isEmpty() || item.getStockLabel().contains(stockLabel)) &&
+                        (brand.isEmpty() || item.getBrand().contains(brand)) &&
+                        (engineNumber.isEmpty() || item.getEngineNumber().contains(engineNumber)) &&
+                        (status.isEmpty() || item.getStatus().contains(status)))
+                    .collect(Collectors.toList());
+
+                // Print all found items (if any)
+                if (!foundItems.isEmpty()) {
+                  System.out.println("Found Items:");
+                  for (InventoryItem item : foundItems) {
+                    System.out.println(item);
+                  }
+                } else {
+                  System.out.println("No items found matching the criteria.");
+                } break;
+                
+                
+            case "n":
+                System.out.print("Enter ID of item to search: ");
+                int id = scanner.nextInt();
+                InventoryItem item = searchItem(id);
+                if (item != null) {
+                    System.out.println("Item found: " + item);
+                } else {
+                    System.out.println("Item with ID " + id + " not found.");
+                }       break;
+            default:
+                System.out.println("Wrong Input.");
+                break;
         }
-    }
+
+    return null;
+}
 
     private static void updateItem(Scanner scanner) {
         System.out.print("Enter ID of item to update: ");
         int id = scanner.nextInt();
         scanner.nextLine();
 
-        InventoryItem item = findItem(id);
+        InventoryItem item = searchItem(id);
         if (item != null) {
             System.out.print("Enter new stock label (leave blank to keep current): ");
             String newLabel = scanner.nextLine();
